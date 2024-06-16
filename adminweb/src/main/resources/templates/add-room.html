@@ -8,7 +8,6 @@
     <link rel="stylesheet" th:href="@{/demo/demo.css}" href="/static/demo/demo.css">
 </head>
 <body>
-<!--<h1>Transactions here</h1>-->
 <div class="wrapper">
     <div class="sidebar" data-color="white" data-active-color="danger">
         <div class="logo">
@@ -18,40 +17,40 @@
                 </div>
                 <p>CT</p>
             </a>
-            <a href="#" class="simple-text logo-normal">
+            <a href="index.html" class="simple-text logo-normal">
                 CineBooker
             </a>
         </div>
         <div class="sidebar-wrapper">
             <ul class="nav">
                 <li class="active ">
-                    <a th:href="@{/movies}" href="movies.html">
+                    <a th:href="@{/movies}">
                         <i class="nc-icon nc-bank"></i>
-                        <p>Phim</p>
+                        <p>Quản lý phim</p>
                     </a>
                 </li>
                 <li>
-                    <a th:href="@{/movies}" href="movie-times.html">
+                    <a th:href="@{/movies}">
                         <i class="nc-icon nc-diamond"></i>
-                        <p>Lịch chiếu</p>
+                        <p>Quản lý lịch chiếu</p>
                     </a>
                 </li>
                 <li>
-                    <a th:href="@{/rooms}" href="rooms.html">
+                    <a th:href="@{/rooms}">
                         <i class="nc-icon nc-pin-3"></i>
-                        <p>Phòng chiếu</p>
+                        <p>Quản lý phòng chiếu</p>
                     </a>
                 </li>
                 <li>
-                    <a th:href="@{/trans}" href="trans.html">
+                    <a th:href="@{/trans}">
                         <i class="nc-icon nc-pin-3"></i>
-                        <p>Đơń vé</p>
+                        <p>Quản lý vé</p>
                     </a>
                 </li>
                 <li>
-                    <a th:href="@{/users}" href="users.html">
+                    <a th:href="@{/users}">
                         <i class="nc-icon nc-pin-3"></i>
-                        <p>Người dùng mobile</p>
+                        <p>Quản lý tài khoản</p>
                     </a>
                 </li>
             </ul>
@@ -111,33 +110,31 @@
         <div class="content">
             <div class="row">
                 <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-header text-center">
-                            <h4 class="card-title text-uppercase title"> Danh sách đơn vé</h4>
+                    <div class="card card-user">
+                        <div class="card-header">
+                            <h5 class="card-title">Thêm mới phòng chiếu</h5>
                         </div>
-                        <div th:if="${error != null}" th:text="${error}"></div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table">
-                                    <thead class=" text-primary">
-                                    <th>Mã giao dịch</th>
-                                    <th>Người dùng</th>
-                                    <th>Thời gian giao dịch</th>
-                                    <th>Tổng số vé</th>
-                                    <th>Thành tiền</th>
-                                    <th>Thao tác</th>
-                                    </thead>
-                                    <tbody>
-                                    <tr th:each="tran : ${transList}">
-                                        <td th:text="${tran.id}"></td>
-                                        <td th:text="${userName[tran.id]}"></td>
-                                        <td th:text="${#dates.format(tran.time, 'dd-MM-yyyy HH:mm:ss')}"></td>
-                                        <td th:text="${ticketTotal[tran.id]}"></td>
-                                        <td th:text="${T(com.binhlc.adminweb.utils.CommonUtils).formatPrice(ticketTotalPrice[tran.id])}"></td>
-                                        <td> <a th:href="@{'/delete-trans/'+${tran.id}}">Delete</a></td>
-                                    </tbody>
-                                </table>
-                            </div>
+                        <div class="card-body ml-auto mr-auto">
+                            <form th:action="@{/rooms/add-room}" method="post" th:object="${roomDTO}" enctype="multipart/form-data">
+                                <div class="row">
+                                    <label>Tên</label>
+                                    <input th:field="*{name}"  type="text" class="form-control" >
+                                </div>
+                                <div class="row">
+                                    <label>Số hàng</label>
+                                    <input th:field="*{numRow}"  type="number" class="form-control" >
+                                </div>
+                                <div class="row">
+                                    <label>Số cột</label>
+                                    <input th:field="*{numCol}"  type="number" class="form-control" >
+                                </div>
+                                <div class="row">
+                                    <div class="update ml-auto mr-auto">
+                                        <button class="btn btn-primary btn-round" type="submit">Thêm</button>
+                                        <a class="btn btn-danger" href="javascript:history.back()" style="margin-left: 10px">Hủy</a>
+                                    </div>
+                                </div>
+                            </form>
                         </div>
                     </div>
 
@@ -164,6 +161,5 @@
         </footer>
     </div>
 </div>
-
 </body>
 </html>

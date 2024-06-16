@@ -21,7 +21,9 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @EnableWebSecurity
 public class SecurityConfig {
     private final AdminService adminService;
-    public SecurityConfig(AdminService adminService) {
+    private final CommonUtils commonUtils;
+    public SecurityConfig(AdminService adminService, CommonUtils commonUtils) {
+        this.commonUtils = commonUtils;
         this.adminService = adminService;
     }
     @Bean

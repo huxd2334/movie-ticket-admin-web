@@ -1,12 +1,8 @@
 package com.binhlc.adminweb.controller;
 
 import com.binhlc.adminweb.dto.MovieTimeDTO;
-import com.binhlc.adminweb.entity.MovieEntity;
-import com.binhlc.adminweb.entity.MovieTimeEntity;
-import com.binhlc.adminweb.entity.RoomEntity;
-import com.binhlc.adminweb.repo.MovieRepo;
-import com.binhlc.adminweb.repo.MovieTimeRepo;
-import com.binhlc.adminweb.repo.RoomRepo;
+import com.binhlc.adminweb.entity.*;
+import com.binhlc.adminweb.repo.*;
 import com.binhlc.adminweb.utils.CommonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -19,10 +15,7 @@ import java.beans.PropertyEditorSupport;
 import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Controller
 @RequestMapping("/movies/{idMovie}/movie-times/")
@@ -52,6 +45,12 @@ public class MovieTimeController {
             }
         });
     }
+
+    @Autowired
+    private RoomDetailRepo roomDetailRepo;
+
+    @Autowired
+    private TicketRepo ticketRepo;
 
     @Autowired
     private MovieTimeRepo movieTimeRepo;
@@ -99,6 +98,26 @@ public class MovieTimeController {
         entity.setTimeCreate(new java.sql.Timestamp(System.currentTimeMillis()));
         entity.setTimeUpdate(new java.sql.Timestamp(System.currentTimeMillis()));
         movieTimeRepo.save(entity);
+        List<RoomDetailEntity> roomDetailList = roomDetailRepo.findAllByRoom(entity.getIdRoom());
+        List<TicketEntity> ticketList = new ArrayList<>();
+        for(RoomDetailEntity temp: roomDetailList){
+            TicketEntity ticketEntity = new TicketEntity();
+            ticketEntity.setIdMovieTime(entity.getId());
+            ticketEntity.setIdRoomDetail(temp.getId());
+            ticketEntity.setStatus(1);
+            ticketEntity.setCreateBy(1);
+            ticketEntity.setUpdateBy(1);
+            ticketEntity.setTimeCreate(new java.sql.Timestamp(System.currentTimeMillis()));
+            ticketEntity.setTimeUpdate(new java.sql.Timestamp(System.currentTimeMillis()));
+            if(temp.getType()==1)
+                ticketEntity.setPrice(entity.getPrice());
+            else if(temp.getType()==2)
+                ticketEntity.setPrice(entity.getPrice()*2);
+            else
+                ticketEntity.setPrice(entity.getPrice());
+            ticketList.add(ticketEntity);
+        }
+        ticketRepo.saveAll(ticketList);
         return "redirect:/movies/" + idMovie + "/movie-times/";
     }
 
@@ -127,6 +146,72 @@ public class MovieTimeController {
         Map<Integer, String> roomMap = createRoomMap(roomList);
         model.addAttribute("roomMap", roomMap);
         return "movie-times";
+    }
+
+    @GetMapping("/edit-movie-time/{idMT}")
+    public String showEditMT(Model model, @PathVariable Integer idMT,  @PathVariable("idMovie") Integer idMovie){
+        Optional<MovieTimeEntity> mt = movieTimeRepo.findById(idMT);
+        if(mt.isPresent()){
+            MovieTimeDTO movieTimeDTO = new MovieTimeDTO();
+            movieTimeDTO.setId(idMT);
+//            movieTimeDTO.setIdMovie(idMovie); // Assuming this returns an Integer representing a date
+//            movieTimeDTO.setIdRoom(mt.get().getIdRoom());
+            movieTimeDTO.setDateStart(CommonUtils.convertDateIntToDate(mt.get().getDateStart())); // change Integer format yyyymmdd to java.util.Date
+            movieTimeDTO.setTimeStart(CommonUtils.convertTimeIntToTime(mt.get().getTimeStart()));
+            movieTimeDTO.setPrice(mt.get().getPrice());
+            model.addAttribute("movieTimeDTO", movieTimeDTO);
+            return "edit-movie-time";
+        }else
+            return "redirect:/movies/" + idMovie + "/movie-times/";
+    }
+
+    @PostMapping("/edit-movie-time/{idMT}")
+    public String editMovieTime( @PathVariable("idMovie") Integer idMovie,@PathVariable Integer idMT, @ModelAttribute MovieTimeDTO movieTimeDTO, BindingResult result, Model model){
+        if(result.hasErrors()) {
+            model.addAttribute("errors", result.getAllErrors());
+            return "edit-movie-time";
+        }
+        MovieTimeEntity entity = movieTimeRepo.findById(idMT).get();
+        if(entity==null){
+            return "redirect:/movies";
+        }else{
+//            entity.setIdMovie(idMovie); // Set idMovie from MovieTimeDTO
+//            entity.setIdRoom(movieTimeDTO.getIdRoom());
+            entity.setDateStart(CommonUtils.convertDateToYYYYmmDD(movieTimeDTO.getDateStart()));
+            entity.setTimeStart(CommonUtils.convertTimeToHHmm(movieTimeDTO.getTimeStart()));
+            entity.setPrice(movieTimeDTO.getPrice());
+            entity.setUpdatedBy(1);
+            entity.setTimeUpdate(new java.sql.Timestamp(System.currentTimeMillis()));
+            movieTimeRepo.save(entity);
+            return "redirect:/movies/"+idMovie+"/movie-times/";
+        }
+    }
+
+    @RequestMapping(value = "/delete-movie-time/{idMT}", method = RequestMethod.GET)
+    public String confirmToDelete( @PathVariable("idMovie") Integer idMovie,@PathVariable("idMT") int idMT, Model model) {
+        MovieTimeEntity movieTime = movieTimeRepo.findById(idMT).orElse(null);
+        if(movieTime == null) {
+            return "redirect:/movies"+idMovie+"/movie-times/";
+        }
+        model.addAttribute("movieTime", movieTime);
+        return "confirm";
+    }
+
+    @RequestMapping(value = "/delete-movie-time/{idMT}", method = RequestMethod.POST)
+    public String deleteMovieTime( @PathVariable("idMovie") Integer idMovie,@PathVariable("idMT") int idMT, Model model) {
+        try{
+            List<TicketEntity> ticketList = ticketRepo.findAllByIdMovieTime(idMT);
+            MovieTimeEntity movieTime = movieTimeRepo.findById(idMT).orElse(null);
+            if(movieTime == null) {
+                return "redirect:/movies"+idMovie+"/movie-times/";
+            }
+            ticketRepo.deleteAll(ticketList);
+            movieTimeRepo.deleteById(idMT);
+        }catch (Exception e) {
+            e.printStackTrace();
+            model.addAttribute("errors", "Error while deleting movie time");
+        }
+        return "redirect:/movies/"+idMovie+"/movie-times/";
     }
 
 }

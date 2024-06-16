@@ -100,6 +100,7 @@ public class UserEntity {
     public Integer getGender() {
         return gender;
     }
+    // male = 1, female = 2
     public void setGender(Integer gender) {
         this.gender = gender;
     }

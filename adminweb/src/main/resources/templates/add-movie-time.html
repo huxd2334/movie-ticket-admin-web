@@ -8,7 +8,6 @@
     <link rel="stylesheet" th:href="@{/demo/demo.css}" href="/static/demo/demo.css">
 </head>
 <body>
-<!--<h1>Transactions here</h1>-->
 <div class="wrapper">
     <div class="sidebar" data-color="white" data-active-color="danger">
         <div class="logo">
@@ -20,38 +19,41 @@
             </a>
             <a href="#" class="simple-text logo-normal">
                 CineBooker
+                <div class="logo-image-big">
+                    <img src="/static/img/logo.png" th:src="@{/static/img/logo.png}">
+                </div>
             </a>
         </div>
         <div class="sidebar-wrapper">
             <ul class="nav">
                 <li class="active ">
-                    <a th:href="@{/movies}" href="movies.html">
+                    <a th:href="@{/movies}">
                         <i class="nc-icon nc-bank"></i>
-                        <p>Phim</p>
+                        <p>Quản lý phim</p>
                     </a>
                 </li>
                 <li>
-                    <a th:href="@{/movies}" href="movie-times.html">
+                    <a th:href="@{/movies}">
                         <i class="nc-icon nc-diamond"></i>
-                        <p>Lịch chiếu</p>
+                        <p>Quản lý lịch chiếu</p>
                     </a>
                 </li>
                 <li>
-                    <a th:href="@{/rooms}" href="rooms.html">
+                    <a th:href="@{/rooms}">
                         <i class="nc-icon nc-pin-3"></i>
-                        <p>Phòng chiếu</p>
+                        <p>Quản lý phòng chiếu</p>
                     </a>
                 </li>
                 <li>
-                    <a th:href="@{/trans}" href="trans.html">
+                    <a th:href="@{/trans}">
                         <i class="nc-icon nc-pin-3"></i>
-                        <p>Đơń vé</p>
+                        <p>Quản lý vé</p>
                     </a>
                 </li>
                 <li>
-                    <a th:href="@{/users}" href="users.html">
+                    <a th:href="@{/users}">
                         <i class="nc-icon nc-pin-3"></i>
-                        <p>Người dùng mobile</p>
+                        <p>Quản lý tài khoản</p>
                     </a>
                 </li>
             </ul>
@@ -69,7 +71,7 @@
                             <span class="navbar-toggler-bar bar3"></span>
                         </button>
                     </div>
-                    <a class="navbar-brand" href="javascript:;">Title</a>
+                    <a class="navbar-brand" href="javascript:;">Admin Dashboard</a>
                 </div>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navigation" aria-controls="navigation-index" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-bar navbar-kebab"></span>
@@ -111,59 +113,77 @@
         <div class="content">
             <div class="row">
                 <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-header text-center">
-                            <h4 class="card-title text-uppercase title"> Danh sách đơn vé</h4>
+                    <div class="card card-user">
+                        <div class="card-header">
+                            <h5 class="card-title" th:if="${movie != null}">Thêm lịch chiếu cho phim [[${#strings.toUpperCase(movie.name)}]]</h5>
                         </div>
-                        <div th:if="${error != null}" th:text="${error}"></div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table">
-                                    <thead class=" text-primary">
-                                    <th>Mã giao dịch</th>
-                                    <th>Người dùng</th>
-                                    <th>Thời gian giao dịch</th>
-                                    <th>Tổng số vé</th>
-                                    <th>Thành tiền</th>
-                                    <th>Thao tác</th>
-                                    </thead>
-                                    <tbody>
-                                    <tr th:each="tran : ${transList}">
-                                        <td th:text="${tran.id}"></td>
-                                        <td th:text="${userName[tran.id]}"></td>
-                                        <td th:text="${#dates.format(tran.time, 'dd-MM-yyyy HH:mm:ss')}"></td>
-                                        <td th:text="${ticketTotal[tran.id]}"></td>
-                                        <td th:text="${T(com.binhlc.adminweb.utils.CommonUtils).formatPrice(ticketTotalPrice[tran.id])}"></td>
-                                        <td> <a th:href="@{'/delete-trans/'+${tran.id}}">Delete</a></td>
-                                    </tbody>
-                                </table>
-                            </div>
+                        <div th:if="${errors != null}">
+                            <ul>
+                                <li th:each="error : ${errors}" th:text="${error.getDefaultMessage()}"></li>
+                            </ul>
+                        </div>
+
+                        <div class="card-body mr-auto ml-auto">
+                            <form th:action="@{'/movies/' + ${idMovie} + '/movie-times/add-movie-time'}" method="post" th:object="${movieTimeDTO}" enctype="multipart/form-data">
+                                <div class="row">
+                                    <label>Tên phòng</label>
+                                    <select class="form-control" name="cate" th:field="*{idRoom}">
+                                        <option value="-1">Chọn phòng</option>
+                                        <option th:each="room : ${roomList}" th:value="${room.idRoom}" th:text="${room.name}"></option>
+                                    </select>
+                                </div>
+                                <div class="row">
+                                    <label>Ngày chiếu</label>
+                                    <input id="dateStart" th:field="*{dateStart}"  type="date" class="form-control" >
+                                </div>
+                                <div class="row">
+                                    <label>Giờ chiếu</label>
+                                    <input th:field="*{timeStart}"  type="time" class="form-control" >
+                                </div>
+                                <div class="row">
+                                    <label>Giá vé</label>
+                                    <input th:field="*{price}"  type="number" class="form-control" >
+                                </div>
+                                <div class="row">
+                                    <div class="update ml-auto mr-auto">
+                                        <button class="btn btn-primary btn-round" type="submit">Thêm</button>
+                                        <a class="btn btn-danger" href="javascript:history.back()" style="margin-left: 10px">Hủy</a>
+                                    </div>
+                                </div>
+                            </form>
                         </div>
                     </div>
+
 
                 </div>
             </div>
         </div>
         <!--        Content end-->
 
-        <footer class="footer" style="position: absolute; bottom: 0; width: -webkit-fill-available;">
-            <div class="container-fluid">
-                <div class="row">
-                    <!--                    <nav class="footer-nav">-->
-                    <!--                        <ul>-->
-                    <!--                            <li>Made by BinhLC</li>-->
-                    <!--                        </ul>-->
-                    <!--                    </nav>-->
-                    <div class="credits ml-auto">
-              <span class="copyright">
-                © 2024, made with <i class="fa fa-heart heart"></i> by Binh LC
-              </span>
-                    </div>
-                </div>
-            </div>
-        </footer>
     </div>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', (event) => {
+    let now = new Date();
+    let today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString().split('T')[0];
+    document.getElementById('dateStart').setAttribute('min', today);
+});
+    document.addEventListener('DOMContentLoaded', (event) => {
+    let today = new Date().toISOString().split('T')[0];
+    let now = new Date().toISOString().split('T')[1].substring(0, 5);
+    let dateStart = document.getElementById('dateStart');
+    let timeStart = document.getElementById('timeStart');
 
+    dateStart.setAttribute('min', today);
+
+    dateStart.addEventListener('change', function() {
+        if (this.value === today) {
+            timeStart.setAttribute('min', now);
+        } else {
+            timeStart.removeAttribute('min');
+        }
+    });
+});
+</script>
 </body>
 </html>

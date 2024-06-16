@@ -47,7 +47,7 @@ public class MovieEntity {
     @Column(name = "image_url")
     private String imageUrl;
 
-    @Column(name = "actor")
+    @Column(name = "actor", columnDefinition = "TEXT")
     private String actor;
 
     @Column(name = "director")
@@ -59,7 +59,7 @@ public class MovieEntity {
     @Column(name = "view")
     private long view;
 
-    @Column(name = "storyLine", columnDefinition = "TEXT")
+    @Column(name = "storyline", columnDefinition = "TEXT")
     private String storyLine;
 
     @Column(name = "created_by")

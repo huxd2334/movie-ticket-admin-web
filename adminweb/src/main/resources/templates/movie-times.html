@@ -1,11 +1,181 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>CineBooker - Admin</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" th:href="@{/css/paper-dashboard.css}" href="/static/css/paper-dashboard.css">
+    <link rel="stylesheet" th:href="@{/demo/demo.css}" href="/static/demo/demo.css">
 </head>
 <body>
-<h1>Movie Times</h1>
+<!--<h1>Movie Times</h1>-->
+<div class="wrapper">
+    <div class="sidebar" data-color="white" data-active-color="danger">
+        <div class="logo">
+            <a href="#" class="simple-text logo-mini">
+                <div class="logo-image-small">
+                    <img th:src="@{/static/img/logo.png}" src="/static/img/logo.png">
+                </div>
+                <p>CT</p>
+            </a>
+            <a href="#" class="simple-text logo-normal">
+                CineBooker
+                <div class="logo-image-big">
+<!--                    <img src="/static/img/logo.png" th:src="@{/static/img/logo.png}">-->
+                </div>
+            </a>
+        </div>
+        <div class="sidebar-wrapper">
+            <ul class="nav">
+                <li class="active ">
+                    <a th:href="@{/movies}">
+                        <i class="nc-icon nc-bank"></i>
+                        <p>Quản lý phim</p>
+                    </a>
+                </li>
+                <li>
+                    <a th:href="@{/movies}">
+                        <i class="nc-icon nc-diamond"></i>
+                        <p>Quản lý lịch chiếu</p>
+                    </a>
+                </li>
+                <li>
+                    <a th:href="@{/rooms}">
+                        <i class="nc-icon nc-pin-3"></i>
+                        <p>Quản lý phòng chiếu</p>
+                    </a>
+                </li>
+                <li>
+                    <a th:href="@{/trans}">
+                        <i class="nc-icon nc-pin-3"></i>
+                        <p>Quản lý vé</p>
+                    </a>
+                </li>
+                <li>
+                    <a th:href="@{/users}">
+                        <i class="nc-icon nc-pin-3"></i>
+                        <p>Quản lý tài khoản</p>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="main-panel" style="height: 100vh;">
+        <!-- Navbar -->
+        <nav class="navbar navbar-expand-lg navbar-absolute fixed-top navbar-transparent">
+            <div class="container-fluid">
+                <div class="navbar-wrapper">
+                    <div class="navbar-toggle">
+                        <button type="button" class="navbar-toggler">
+                            <span class="navbar-toggler-bar bar1"></span>
+                            <span class="navbar-toggler-bar bar2"></span>
+                            <span class="navbar-toggler-bar bar3"></span>
+                        </button>
+                    </div>
+                    <a class="navbar-brand" href="javascript:;">Admin Dashboard</a>
+                </div>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navigation" aria-controls="navigation-index" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-bar navbar-kebab"></span>
+                    <span class="navbar-toggler-bar navbar-kebab"></span>
+                    <span class="navbar-toggler-bar navbar-kebab"></span>
+                </button>
+                <div class="collapse navbar-collapse justify-content-end" id="navigation">
+                    <form>
+                        <div class="input-group no-border">
+                            <input type="text" value="" class="form-control" placeholder="Search...">
+                            <div class="input-group-append">
+                                <div class="input-group-text">
+                                    <i class="nc-icon nc-zoom-split"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    <ul class="navbar-nav">
+                        <li class="nav-item btn-rotate dropdown">
+                            <a class="nav-link dropdown-toggle" href="http://example.com" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="nc-icon nc-bell-55"></i>
+                                <p>
+                                    <span class="d-lg-none d-md-block">Some Actions</span>
+                                </p>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
+                                <a class="dropdown-item" href="#">Action</a>
+                                <a class="dropdown-item" href="#">Another action</a>
+                                <a class="dropdown-item" href="#">Something else here</a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <!-- End Navbar -->
+
+        <!--        Content begin-->
+        <div class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title" th:if="${movie != null}">Lịch chiếu [[${#strings.toUpperCase(movie.name)}]]</h4>
+                        </div>
+
+                        <div>
+                            <a th:href="@{'/movies/' + ${idMovie} + '/movie-times/add-movie-time.html'}" class="btn btn-primary">Thêm mới</a>
+                            <!--                        <a th:href="@{/movies/{idMovie}/movie-times/add-movie-time.html}" class="btn btn-primary">Thêm lich chieu</a>-->
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead class=" text-primary">
+                                    <th>Phòng chiếu</th>
+                                    <th>Ngày chiếu</th>
+                                    <th>Giờ bắt đầu</th>
+                                    <th>Giá vé</th>
+                                    <th>Thao tác</th>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="mt : ${movieTimeList}">
+                                        <td th:text="${roomMap[mt.idRoom]}"></td>
+                                        <td th:text="${T(com.binhlc.adminweb.utils.CommonUtils).convertToDDMMYYYY(mt.dateStart)}"></td>
+                                        <td th:text="${T(com.binhlc.adminweb.utils.CommonUtils).convertTimeStart(mt.timeStart)}"></td>
+                                        <td th:text="${T(com.binhlc.adminweb.utils.CommonUtils).formatPrice(mt.price)}"></td>
+                                        <td class="flex">
+                                            <a class="btn btn-warning" th:href="@{'/movies/' + ${idMovie} +'/movie-times/edit-movie-time/'+${mt.id}}">Sửa</a>
+                                            <form c th:action="@{'/movies/' + ${idMovie} +'/movie-times/delete-movie-time/'+${mt.id}}" method="post" onsubmit="return confirm('Bạn muốn xoá lịch chiếu này?')">
+                                                <input type="submit" value="Delete">
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+        <!--        Content end-->
+
+        <footer class="footer" style="position: absolute; bottom: 0; width: -webkit-fill-available;">
+            <div class="container-fluid">
+                <div class="row">
+<!--                    <nav class="footer-nav">-->
+<!--                        <ul>-->
+<!--                            <li>Made by BinhLC</li>-->
+<!--                        </ul>-->
+<!--                    </nav>-->
+                    <div class="credits ml-auto">
+              <span class="copyright">
+                © 2024, made with <i class="fa fa-heart heart"></i> by Binh LC
+              </span>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+</div>
 
 </body>
 </html>
