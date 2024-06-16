@@ -8,6 +8,8 @@ import java.time.LocalTime;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class CommonUtils {
     public static Integer convertTimeToHHmm(java.sql.Time time){
@@ -47,13 +49,28 @@ public class CommonUtils {
     public static String convertMovieStatus(int status){
         switch (status){
             case 0:
-                return "Not active";
+                return "Disabled";
             case 1:
                 return "Active";
             default:
                 return "Đang cập nhật";
         }
     }
+
+    public static String extractYoutubeId(String url) {
+        String videoId = null;
+        String pattern = "(?<=watch\\?v=|/videos/|embed\\/|youtu.be\\/|\\/v\\/|\\/e\\/|watch\\?v%3D|watch\\?feature=player_embedded&v=|%2Fvideos%2F|embed%\u200C\u200B2F|youtu.be%2F|%2Fv%2F)[^#\\&\\?\\n]*";
+        Pattern compiledPattern = Pattern.compile(pattern);
+        Matcher matcher = compiledPattern.matcher(url); //url is youtube url for which you want to extract the video id.
+        if (matcher.find()) {
+            videoId = matcher.group();
+        }
+        return videoId;
+    }
+
+//    public static void main(String[] args) {
+//        System.out.println(extractYoutubeId("https://youtu.be/qn1t_biQigc?feature=shared"));
+//    }
 
     public static String convertTimeStart(int time){
         int hour = time/100;

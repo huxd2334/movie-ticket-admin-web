@@ -17,4 +17,5 @@ public interface TicketRepo extends JpaRepository<TicketEntity,Integer> {
 
     boolean existsByIdMovieTime(Integer idMovieTime);
     List<TicketEntity> findAllByIdMovieTime(Integer idMovieTime);
+    List<TicketEntity> findAllByIdMovie(Integer idMovie);
 }

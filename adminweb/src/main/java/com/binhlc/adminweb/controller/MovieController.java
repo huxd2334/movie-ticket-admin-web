@@ -4,9 +4,11 @@ import com.binhlc.adminweb.dto.MovieDTO;
 import com.binhlc.adminweb.entity.CategoryEntity;
 import com.binhlc.adminweb.entity.MovieCategoryEntity;
 import com.binhlc.adminweb.entity.MovieEntity;
+import com.binhlc.adminweb.entity.TicketEntity;
 import com.binhlc.adminweb.repo.CategoryRepo;
 import com.binhlc.adminweb.repo.MovieCategoryRepo;
 import com.binhlc.adminweb.repo.MovieRepo;
+import com.binhlc.adminweb.repo.TicketRepo;
 import com.binhlc.adminweb.utils.CommonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -29,6 +31,9 @@ public class MovieController {
     @Autowired
     private MovieCategoryRepo movieCategoryRepo;
 
+    @Autowired
+    private TicketRepo ticketRepo;
+
     @GetMapping("/add-movie.html")
     public String showAddMovie(Model model) {
         List<CategoryEntity> categoryList = categoryRepo.findAll(); // Assuming categoryRepo is your repository for categories
@@ -49,9 +54,10 @@ public class MovieController {
         movie.setDirector(movieDTO.getDirector());
         movie.setActor(movieDTO.getActor());
         movie.setStoryLine(movieDTO.getStoryLine());
-        movie.setTrailer(movieDTO.getTrailer());
+        movie.setTrailer(CommonUtils.extractYoutubeId(movieDTO.getTrailer()));
         movie.setReleasedDate(CommonUtils.convertDateToYYYYmmDD(movieDTO.getReleasedDate()));
         movie.setDuration((movieDTO.getDuration()));
+        movie.setImageUrl(movieDTO.getImageUrl());
         movie.setStatus((movieDTO.getStatus()));
         movie.setLanguage(movieDTO.getLanguage());
         movie.setSubTitle(movieDTO.getSubTitle());
@@ -89,9 +95,10 @@ public class MovieController {
         movieDTO.setName(movie.getName());
         movieDTO.setDirector(movie.getDirector());
         movieDTO.setActor(movie.getActor());
+        movieDTO.setImageUrl(movie.getImageUrl());
         movieDTO.setStoryLine(movie.getStoryLine());
         movieDTO.setTrailer(movie.getTrailer());
-        movieDTO.setReleasedDate(CommonUtils.convertIntToDate(movie.getReleasedDate())); // Now you can pass it to setReleasedDate
+        movieDTO.setReleasedDate(CommonUtils.convertIntToDate(movie.getReleasedDate()));
         movieDTO.setDuration((movie.getDuration()));
         movieDTO.setStatus((movie.getStatus()));
         movieDTO.setLanguage(movie.getLanguage());
@@ -132,15 +139,17 @@ public class MovieController {
         movie.setDirector(movieDTO.getDirector());
         movie.setActor(movieDTO.getActor());
         movie.setStoryLine(movieDTO.getStoryLine());
-        movie.setTrailer(movieDTO.getTrailer());
+        movie.setTrailer(CommonUtils.extractYoutubeId(movieDTO.getTrailer()));
         movie.setReleasedDate(CommonUtils.convertDateToYYYYmmDD(movieDTO.getReleasedDate()));
         movie.setDuration((movieDTO.getDuration()));
+        movie.setImageUrl(movieDTO.getImageUrl());
         movie.setStatus((movieDTO.getStatus()));
         movie.setLanguage(movieDTO.getLanguage());
         movie.setSubTitle(movieDTO.getSubTitle());
         movie.setCountry(movieDTO.getCountry());
         movie.setCensor((movieDTO.getCensor()));
         movie.setDubbing((movieDTO.getDubbing()));
+        movie.setImageUrl(movieDTO.getImageUrl());
         movie.setTimeUpdate(new Timestamp(System.currentTimeMillis()));
 //        movie.setThumb(movieDTO.getThumbnail());
 //        movie.setView(movie.getView());
@@ -190,6 +199,27 @@ public class MovieController {
             categories.add(category);
         }
         return categories;
+    }
+
+    @RequestMapping(value = "/delete-movie/{id}", method = RequestMethod.GET)
+    public String deleteMovie(@PathVariable("id") Integer id, Model model) {
+        MovieEntity movie = movieRepo.findById(id).orElse(null);
+        if (movie == null) {
+            return "redirect:/movies";
+        }
+        model.addAttribute("movie", movie);
+        return "confirm";
+    }
+
+    @RequestMapping(value = "/delete-movie/{id}", method = RequestMethod.POST)
+    public String confirmToDelete(@PathVariable("id") Integer id, Model model) {
+        try {
+            movieRepo.deleteById(id);
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.addAttribute("errors", "Error while deleting movie");
+        }
+        return "redirect:/movies";
     }
 
 }
